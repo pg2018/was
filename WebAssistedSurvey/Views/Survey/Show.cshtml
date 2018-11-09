@@ -1,0 +1,70 @@
+﻿@model Survey
+@{
+    Layout = "~/Views/Shared/_SurveyLayout.cshtml";
+}
+
+@if (Model == null)
+{
+    ViewData["Title"] = "Keine gültige Umfrage gefunden!";
+    <partial name="_NoValidSurveyFound"/>
+}
+else
+{
+    ViewData["Title"] = $"Umfrage zur Veranstaltung {Model.Event.Title}";
+
+    <h2>@ViewBag.Title</h2>
+
+    using (Html.BeginForm("Add", "Survey", new { Model }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        @Html.HiddenFor(m => m.EventID)
+        @Html.HiddenFor(m => m.Created)
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.ContactName)
+            @Html.TextBoxFor(m => m.ContactName, new { @class = "form-control" })
+            <span asp-validation-for="ContactName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <div class="checkbox">
+                <label>
+                    <input asp-for="WantNewsletter" id="wantNewsletter" /> @Html.DisplayNameFor(model => model.WantNewsletter)
+                </label>
+            </div>
+        </div>
+        <div class="form-group" id="contactMail">
+            @Html.LabelFor(m => m.ContactEmail)
+            @Html.TextBoxFor(m => m.ContactEmail, new { @class = "form-control" })
+            <span asp-validation-for="ContactEmail" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.GoodGuy)
+            @Html.TextAreaFor(m => m.GoodGuy, new { @class = "form-control" })
+            <span asp-validation-for="GoodGuy" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.BadGuy)
+            @Html.TextAreaFor(m => m.BadGuy, new { @class = "form-control" })
+            <span asp-validation-for="BadGuy" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Feedback)
+            @Html.TextAreaFor(m => m.Feedback, new { @class = "form-control" })
+            <span asp-validation-for="Feedback" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Source)
+            @Html.TextAreaFor(m => m.Source, new { @class = "form-control" })
+            <span asp-validation-for="Source" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Abschicken" asp-controller="Survey" asp-action="Add" class="btn btn-primary" />
+            <input type="reset" value="Zur&uuml;cksetzen" class="btn btn-default" />
+        </div>
+    }
+
+    <script type="text/javascript">
+        toggleDivByCheckbox("#contactMail", "#wantNewsletter");
+    </script>
+}

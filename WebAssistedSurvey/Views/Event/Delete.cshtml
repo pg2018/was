@@ -1,0 +1,50 @@
+﻿@model WebAssistedSurvey.Models.Event
+
+@{
+    ViewData["Title"] = $"Löschen von {Model.Title}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Sind Sie sicher das sie diese Veranstaltung löschen wollen?</h3>
+<div>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.StartDateTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.StartDateTime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.IsMultidays)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.IsMultidays)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.EndDateTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.EndDateTime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Summery)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Summery)
+        </dd>
+    </dl>
+
+    @using (Html.BeginForm("DoDelete", "Event", new { id = Model.EventID }))
+    {
+        <input type="submit" value="Löschen" class="btn btn-danger" />
+        <input type="submit" value="Abbrechen" class="btn btn-default" asp-action="Index" />
+    }
+</div>

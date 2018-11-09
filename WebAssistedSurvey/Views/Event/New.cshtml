@@ -1,0 +1,52 @@
+﻿@model Event
+
+@{
+    ViewData["Title"] = "Neue Veranstaltung anlegen";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Neue Veranstaltung anlegen</h2>
+
+<hr />
+
+@using (Html.BeginForm("Add", "Event", new { Model }, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.Surveys)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Title)
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control" })
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.StartDateTime)
+        @Html.TextBoxFor(m => m.StartDateTime, new { @class = "form-control" })
+        <span asp-validation-for="StartDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <div class="checkbox">
+            <label>
+                <input asp-for="IsMultidays" id="isMultidays" /> @Html.DisplayNameFor(model => model.IsMultidays)
+            </label>
+        </div>
+    </div>
+    <div class="form-group" id="endDateTime">
+        @Html.LabelFor(m => m.EndDateTime)
+        @Html.TextBoxFor(m => m.EndDateTime, new { @class = "form-control" })
+        <span asp-validation-for="EndDateTime" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Summery)
+        @Html.TextAreaFor(m => m.Summery, new { @class = "form-control" })
+        <span asp-validation-for="Summery" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Anlegen" class="btn btn-default" />
+    </div>
+}
+
+<script type="text/javascript">
+    toggleDivByCheckbox("#endDateTime", "#isMultidays");
+</script>

@@ -1,0 +1,41 @@
+﻿@model IList<Event>
+@{
+    ViewData["Title"] = "Veranstaltungsübersicht";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewData["CsvMessage"] = TempData["CsvMessage"];
+}
+
+<h2>@ViewBag.Title</h2>
+
+@if (ViewData["CsvMessage"] != null)
+{
+    @ViewData["CsvMessage"]
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @ViewData["CsvMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert-info" role="alert">
+        Keine Veranstaltungen vorhanden.
+    </div>
+}
+else
+{
+    <ul>
+        @foreach (var surveyEvent in Model)
+        {
+            <li>
+                @surveyEvent.Title (@surveyEvent.StartDateTime.ToShortDateString())
+                | @Html.ActionLink("Anzeigen", "Show", "Event", new { id = surveyEvent.EventID })
+                | @Html.ActionLink("CSV Download", "GetSurveysAsCsv", "Event", new { id = surveyEvent.EventID })
+                | @Html.ActionLink("Löschen", "Delete", "Event", new { id = surveyEvent.EventID })
+            </li>
+        }
+    </ul>
+}

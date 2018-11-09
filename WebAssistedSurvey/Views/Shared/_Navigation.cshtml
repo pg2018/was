@@ -1,0 +1,21 @@
+﻿<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a asp-area="" asp-controller="Event" asp-action="Index" class="navbar-brand">Web Umfragen</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a asp-area="" asp-controller="Event" asp-action="Index">Veranstaltungs Übersicht</a></li>
+                <li><a asp-area="" asp-controller="Event" asp-action="New">Neue Veranstaltung</a></li>
+                @*<li><a asp-area="" asp-controller="Survey" asp-action="About">About</a></li>*@
+                @*<li><a asp-area="" asp-controller="Survey" asp-action="Contact">Contact</a></li>*@
+            </ul>
+        </div>
+    </div>
+</nav>
