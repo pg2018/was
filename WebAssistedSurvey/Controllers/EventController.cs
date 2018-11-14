@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using QRCoder;
 using WebAssistedSurvey.Models;
 
 namespace WebAssistedSurvey.Controllers
@@ -152,6 +154,25 @@ namespace WebAssistedSurvey.Controllers
             context.SaveChanges();
 
             return RedirectToAction("Index");
+        }
+
+        public IActionResult GetQrCode(int id)
+        {
+            PayloadGenerator.Url url = new PayloadGenerator.Url($"http://{Request.Host.Host}:{Request.Host.Port}/Survey/Show/{id}");
+
+            QRCodeGenerator qrCodeGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrCodeGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new QRCode(qrCodeData);
+            var qrBitmap = qrCode.GetGraphic(20);
+
+            byte[] data;
+            using (var stream = new MemoryStream())
+            {
+                qrBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                data = stream.ToArray();
+            }
+            
+            return File(data, "image/png", $"QRCode_{id}.png");
         }
     }
 }

@@ -35,6 +35,7 @@ else
                 | @Html.ActionLink("Anzeigen", "Show", "Event", new { id = surveyEvent.EventID })
                 | @Html.ActionLink("CSV Download", "GetSurveysAsCsv", "Event", new { id = surveyEvent.EventID })
                 | @Html.ActionLink("Löschen", "Delete", "Event", new { id = surveyEvent.EventID })
+                | @Html.ActionLink("QR Code", "GetQRCode", "Event", new { id = surveyEvent.EventID })
             </li>
         }
     </ul>
