@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAssistedSurvey.Business;
 using WebAssistedSurvey.Models;
 
 namespace WebAssistedSurvey.Controllers
@@ -18,25 +15,15 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult Show(int id)
         {
-            var context = new SurveyContext();
-            
-            var surveyEvent = context.Events.FirstOrDefault(e => e.EventID == id);
+            var surveyEvent = DatabaseLayer.GetEventById(id);
             if (surveyEvent == null)
             {
                 return NotFound();
             }
 
-            var now = DateTime.Now;
-            if (surveyEvent.StartDateTime.CompareTo(now) == -1 &&
-                surveyEvent.EndDateTime.GetValueOrDefault().CompareTo(now) == 1)
+            if (DatabaseLayer.IsValidEventExisting(id))
             {
-                Survey survey = new Survey
-                {
-                    Event = surveyEvent,
-                    EventID = surveyEvent.EventID,
-                    Created = DateTime.Now
-                };
-
+                var survey = DatabaseLayer.CreateNewSurvey(id);
                 return View(survey);
             }
 
@@ -50,16 +37,10 @@ namespace WebAssistedSurvey.Controllers
                 return View("Show", survey);
             }
 
-            var context = new SurveyContext();
-
-            var surveyEvent = context.Events.FirstOrDefault(e => e.EventID == survey.EventID);
-            if (surveyEvent == null)
+            if(!DatabaseLayer.AddSurvey(survey))
             {
                 return NotFound();
             }
-
-            context.Surveys.Add(survey);
-            context.SaveChanges();
 
             return Content("Danke für Ihre Mithilfe.");
         }

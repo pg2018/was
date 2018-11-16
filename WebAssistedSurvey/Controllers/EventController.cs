@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing.Imaging;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using WebAssistedSurvey.Business;
 using WebAssistedSurvey.Models;
@@ -12,20 +10,14 @@ namespace WebAssistedSurvey.Controllers
     {
         public IActionResult Index()
         {
-            var context = new SurveyContext();
-
-            var events = context.Events.ToList();
+            IList<Event> events = DatabaseLayer.GetEvents();
 
             return View(events);
         }
 
         public IActionResult New()
         {
-            Event newEvent = new Event
-            {
-                Surveys = new List<Survey>(),
-                StartDateTime = DateTime.Now
-            };
+            Event newEvent = DatabaseLayer.CreateNewEvent();
 
             return View(newEvent);
         }
@@ -37,33 +29,17 @@ namespace WebAssistedSurvey.Controllers
                 return View("New", @event);
             }
 
-            if (!@event.IsMultidays)
-            {
-                @event.EndDateTime = @event.StartDateTime.AddHours(3);
-            }
-
-            var context = new SurveyContext();
-
-            context.Events.Add(@event);
-            context.SaveChanges();
+            DatabaseLayer.AddEvent(@event, 3);
 
             return RedirectToAction("Index");
         }
 
         public IActionResult Show(int id)
         {
-            var context = new SurveyContext();
-
-            var surveyEvent = context.Events.FirstOrDefault(e => e.EventID == id);
+            Event surveyEvent = DatabaseLayer.GetEventById(id);
             if (surveyEvent == null)
             {
                 return NotFound();
-            }
-
-            var surveys = context.Surveys.Where(s => s.EventID == surveyEvent.EventID);
-            if (surveys.Any())
-            {
-                surveyEvent.Surveys = new List<Survey>(surveys);
             }
 
             return View(surveyEvent);
@@ -71,23 +47,16 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult GetSurveysAsCsv(int id)
         {
-            var context = new SurveyContext();
-
-            var surveyEvent = context.Events.FirstOrDefault(e => e.EventID == id);
+            Event surveyEvent = DatabaseLayer.GetEventById(id);
             if (surveyEvent == null)
             {
                 return NotFound();
             }
 
-            var surveys = context.Surveys.Where(s => s.EventID == surveyEvent.EventID);
-            if (surveys.Any())
-            {
-                surveyEvent.Surveys = new List<Survey>(surveys);
-            }
-            else
+            if(surveyEvent.Surveys == null)
             {
                 TempData["CsvMessage"] = $"Für die Veranstaltung \"{surveyEvent.Title}\" wurden keine Umfragen zum exportieren gefunden.";
-                return View("Index", context.Events.ToList());
+                return View("Index", DatabaseLayer.GetEvents());
             }
 
             var data = CsvExporter.GetCsvData(surveyEvent);
@@ -96,9 +65,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult ShowSurvey(int id)
         {
-            var context = new SurveyContext();
-
-            var survey = context.Surveys.FirstOrDefault(e => e.SurveyID == id);
+            Survey survey = DatabaseLayer.GetSurveyById(id);
             if (survey == null)
             {
                 return NotFound();
@@ -109,9 +76,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult DeleteSurvey(int id)
         {
-            var context = new SurveyContext();
-
-            var survey = context.Surveys.FirstOrDefault(e => e.SurveyID == id);
+            Survey survey = DatabaseLayer.GetSurveyById(id);
             if (survey == null)
             {
                 return NotFound();
@@ -122,9 +87,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult Delete(int id)
         {
-            var context = new SurveyContext();
-
-            var eventToDelete = context.Events.FirstOrDefault(e => e.EventID == id);
+            var eventToDelete = DatabaseLayer.GetEventById(id);
             if (eventToDelete == null)
             {
                 return NotFound();
@@ -135,23 +98,11 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult DoDelete(int id)
         {
-            var context = new SurveyContext();
-
-            var eventToDelete = context.Events.FirstOrDefault(e => e.EventID == id);
-            if (eventToDelete == null)
+            var eventToDeleteFound = DatabaseLayer.DeleteEventWithSurveysByEventId(id);
+            if (!eventToDeleteFound)
             {
                 return NotFound();
             }
-
-            var surveys = context.Surveys.Where(s => s.EventID == id);
-            foreach (var survey in surveys)
-            {
-                context.Surveys.Remove(survey);
-            }
-
-            context.Events.Remove(eventToDelete);
-
-            context.SaveChanges();
 
             return RedirectToAction("Index");
         }
