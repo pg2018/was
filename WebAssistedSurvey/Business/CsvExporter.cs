@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using WebAssistedSurvey.Models;
 
-namespace WebAssistedSurvey.Controllers
+namespace WebAssistedSurvey.Business
 {
-    public class CsvExporter
+    internal class CsvExporter
     {
-        public static byte[] GetCsvData(Event @event)
+        internal static byte[] GetCsvData(Event @event)
         {
             StringBuilder sb = new StringBuilder();
 
