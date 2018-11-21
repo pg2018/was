@@ -77,17 +77,7 @@ namespace WebAssistedSurvey.Business
 
             return survey;
         }
-
-        //internal static bool AddSurvey(Survey survey)
-        //{
-        //    var context = new SurveyContext();
-
-        //    context.Surveys.Add(survey);
-        //    context.SaveChanges();
-
-        //    return true;
-        //}
-
+        
         private static IList<Survey> GetSurveysByEventId(int eventId)
         {
             var context = new SurveyContext();

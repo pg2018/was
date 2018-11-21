@@ -75,7 +75,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult ShowSurvey(int id)
         {
-            Survey survey = DatabaseLayer.GetSurveyById(id);
+            Survey survey = RestAdapter.GetSurveyById(id);
             if (survey == null)
             {
                 return new StatusCodeResult(503);

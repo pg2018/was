@@ -37,10 +37,7 @@ namespace WebAssistedSurvey.Controllers
                 return View("Show", survey);
             }
 
-            if(!RestAdapter.AddSurvey(survey))
-            {
-                return new StatusCodeResult(503);
-            }
+            RestAdapter.AddSurvey(survey);
 
             return Content("Danke für Ihre Mithilfe.");
         }

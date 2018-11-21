@@ -75,11 +75,11 @@ namespace WebAssistedSurvey.Business
             client.PostAsJsonAsync($"{baseUrl}events", json);
         }
 
-        public static bool AddSurvey(Survey survey)
+        public static void AddSurvey(Survey survey)
         {
             var json = JsonConvert.SerializeObject(survey);
 
-            return client.PostAsJsonAsync($"{baseUrl}surveys", json).IsCompletedSuccessfully;
+            client.PostAsJsonAsync($"{baseUrl}surveys", json);
         }
 
         internal static Survey GetSurveyById(int id)
@@ -101,7 +101,20 @@ namespace WebAssistedSurvey.Business
         {
             try
             {
-                throw new NotImplementedException();
+                var survey = new Survey
+                {
+                    BadGuy = JsonParse<string>(jObject, "badGuy"),
+                    GoodGuy = JsonParse<string>(jObject, "goodGuy"),
+                    ContactEmail = JsonParse<string>(jObject, "contactEmail"),
+                    ContactName = JsonParse<string>(jObject, "contactName"),
+                    Feedback = JsonParse<string>(jObject, "feedback"),
+                    Source = JsonParse<string>(jObject, "source"),
+                    SurveyID = JsonParse<int>(jObject, "webSurveyID"),
+                    EventID = JsonParse<int>(jObject, "webEventID"),
+                    Created = JsonParse<DateTime>(jObject, "created")
+                };
+
+                return survey;
             }
             catch
             {
@@ -147,6 +160,24 @@ namespace WebAssistedSurvey.Business
                 return result;
             }
 
+            foreach (var item in token.SelectToken("webSurveys"))
+            {
+                var survey = new Survey
+                {
+                    BadGuy = JsonParse<string>(item, "badGuy"),
+                    GoodGuy = JsonParse<string>(item, "goodGuy"),
+                    ContactEmail = JsonParse<string>(item, "contactEmail"),
+                    ContactName = JsonParse<string>(item, "contactName"),
+                    Feedback = JsonParse<string>(item, "feedback"),
+                    Source = JsonParse<string>(item, "source"),
+                    SurveyID = JsonParse<int>(item, "webSurveyID"),
+                    EventID = JsonParse<int>(item, "webEventID"),
+                    Created = JsonParse<DateTime>(item, "created")
+                };
+
+                result.Add(survey);
+            }
+
             return result;
         }
 
@@ -155,8 +186,6 @@ namespace WebAssistedSurvey.Business
             var obj = jToken.SelectToken(name).ToObject(typeof(T));
 
             return (T)obj;
-
-            //return (T)jToken.SelectToken(name).ToObject(typeof(T));
         }
     }
 }
