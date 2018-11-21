@@ -28,18 +28,10 @@ namespace WebAssistedSurvey.Service.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var context = new DataContext();
-
-            var item = context.WebEvents.FirstOrDefault(e => e.WebEventID == id);
+            var item = GetWebEventById(id);
             if (item == null)
             {
                 return NotFound();
-            }
-
-            var surveysForEvent = context.WebSurveys.Where(s => s.WebEventID == id);
-            if (surveysForEvent.Any())
-            {
-                item.WebSurveys = new List<WebSurvey>(surveysForEvent);
             }
 
             return new JsonResult(item);
@@ -62,16 +54,25 @@ namespace WebAssistedSurvey.Service.Controllers
             context.SaveChanges();
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/values/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            var context = new DataContext();
+
+            var webEvent = GetWebEventById(id);
+            if (webEvent == null)
+            {
+                return;
+            }
+
+            foreach (var webSurvey in webEvent.WebSurveys)
+            {
+                context.WebSurveys.Remove(webSurvey);
+            }
+
+            context.WebEvents.Remove(webEvent);
+
+            context.SaveChanges();
         }
 
         private T JsonParse<T>(JObject jObject, string name)
@@ -110,6 +111,22 @@ namespace WebAssistedSurvey.Service.Controllers
             {
                 return null;
             }
+        }
+
+        private WebEvent GetWebEventById(int id)
+        {
+            var context = new DataContext();
+
+            var item = context.WebEvents.FirstOrDefault(e => e.WebEventID == id);
+            if (item == null)
+            {
+                return null;
+            }
+
+            var surveysForEvent = context.WebSurveys.Where(s => s.WebEventID == id);
+            item.WebSurveys = surveysForEvent.Any() ? new List<WebSurvey>(surveysForEvent) : new List<WebSurvey>();
+
+            return item;
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WebAssistedSurvey.Models;
@@ -95,6 +92,25 @@ namespace WebAssistedSurvey.Business
             }
 
             return GetSurveyFromJsonToken(obj);
+        }
+
+        internal static bool IsValidEventExisting(int id)
+        {
+            var surveyEvent = GetEventById(id);
+
+            var now = DateTime.Now;
+            if (surveyEvent.StartDateTime.CompareTo(now) == -1 &&
+                surveyEvent.EndDateTime.GetValueOrDefault().CompareTo(now) == 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        internal static void DeleteEventWithSurveysByEventId(int id)
+        {
+            client.DeleteAsync($"{baseUrl}events/{id}");
         }
 
         private static Survey GetSurveyFromJsonToken(JObject jObject)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using WebAssistedSurvey.Business;
 using WebAssistedSurvey.Models;
 
@@ -21,9 +22,15 @@ namespace WebAssistedSurvey.Controllers
                 return new StatusCodeResult(503);
             }
 
-            if (DatabaseLayer.IsValidEventExisting(id))
+            if (RestAdapter.IsValidEventExisting(id))
             {
-                var survey = DatabaseLayer.CreateNewSurvey(id);
+                Survey survey = new Survey
+                {
+                    Event = surveyEvent,
+                    EventID = surveyEvent.EventID,
+                    Created = DateTime.Now
+                };
+
                 return View(survey);
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing.Imaging;
 using Microsoft.AspNetCore.Mvc;
 using WebAssistedSurvey.Business;
@@ -21,7 +22,11 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult New()
         {
-            Event newEvent = DatabaseLayer.CreateNewEvent();
+            Event newEvent = new Event
+            {
+                Surveys = new List<Survey>(),
+                StartDateTime = DateTime.Now
+            };
 
             return View(newEvent);
         }
@@ -86,7 +91,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult DeleteSurvey(int id)
         {
-            Survey survey = DatabaseLayer.GetSurveyById(id);
+            Survey survey = RestAdapter.GetSurveyById(id);
             if (survey == null)
             {
                 return new StatusCodeResult(503);
@@ -108,11 +113,7 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult DoDelete(int id)
         {
-            var eventToDeleteFound = DatabaseLayer.DeleteEventWithSurveysByEventId(id);
-            if (!eventToDeleteFound)
-            {
-                return new StatusCodeResult(503);
-            }
+            RestAdapter.DeleteEventWithSurveysByEventId(id);
 
             return RedirectToAction("Index");
         }
