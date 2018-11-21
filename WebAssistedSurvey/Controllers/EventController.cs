@@ -10,7 +10,11 @@ namespace WebAssistedSurvey.Controllers
     {
         public IActionResult Index()
         {
-            IList<Event> events = DatabaseLayer.GetEvents();
+            var events = RestAdapter.GetEvents();
+            if (events == null)
+            {
+                return new StatusCodeResult(503);
+            }
 
             return View(events);
         }
@@ -29,17 +33,17 @@ namespace WebAssistedSurvey.Controllers
                 return View("New", @event);
             }
 
-            DatabaseLayer.AddEvent(@event, 3);
+            RestAdapter.AddEvent(@event, 3);
 
             return RedirectToAction("Index");
         }
 
         public IActionResult Show(int id)
         {
-            Event surveyEvent = DatabaseLayer.GetEventById(id);
+            Event surveyEvent = RestAdapter.GetEventById(id);
             if (surveyEvent == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return View(surveyEvent);
@@ -47,16 +51,22 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult GetSurveysAsCsv(int id)
         {
-            Event surveyEvent = DatabaseLayer.GetEventById(id);
+            Event surveyEvent = RestAdapter.GetEventById(id);
             if (surveyEvent == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             if(surveyEvent.Surveys == null)
             {
                 TempData["CsvMessage"] = $"Für die Veranstaltung \"{surveyEvent.Title}\" wurden keine Umfragen zum exportieren gefunden.";
-                return View("Index", DatabaseLayer.GetEvents());
+                var events = RestAdapter.GetEvents();
+                if (events == null)
+                {
+                    return new StatusCodeResult(503);
+                }
+
+                return View("Index", events);
             }
 
             var data = CsvExporter.GetCsvData(surveyEvent);
@@ -68,7 +78,7 @@ namespace WebAssistedSurvey.Controllers
             Survey survey = DatabaseLayer.GetSurveyById(id);
             if (survey == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return View(survey);
@@ -79,7 +89,7 @@ namespace WebAssistedSurvey.Controllers
             Survey survey = DatabaseLayer.GetSurveyById(id);
             if (survey == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return View(survey);
@@ -87,10 +97,10 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult Delete(int id)
         {
-            var eventToDelete = DatabaseLayer.GetEventById(id);
+            var eventToDelete = RestAdapter.GetEventById(id);
             if (eventToDelete == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return View(eventToDelete);
@@ -101,7 +111,7 @@ namespace WebAssistedSurvey.Controllers
             var eventToDeleteFound = DatabaseLayer.DeleteEventWithSurveysByEventId(id);
             if (!eventToDeleteFound)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return RedirectToAction("Index");

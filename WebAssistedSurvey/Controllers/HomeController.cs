@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
-using WebAssistedSurvey.Models;
+using WebAssistedSurvey.Business;
 
 namespace WebAssistedSurvey.Controllers
 {
@@ -12,11 +10,15 @@ namespace WebAssistedSurvey.Controllers
     {
         public IActionResult Index()
         {
-            var context = new SurveyContext();
-
             ViewBag.DateTimeNow = DateTime.Now.ToString();
 
-            return View(context.Events.ToList());
+            var events = RestAdapter.GetEvents();
+            if (events == null)
+            {
+                return StatusCode(503);
+            }
+
+            return View(events);
         }
     }
 }

@@ -49,40 +49,16 @@ namespace WebAssistedSurvey.Service.Controllers
         [HttpPost]
         public void Post([FromBody] string value)
         {
-            // Console.Out.WriteLine($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}{Context.Request.QueryString}");
-            Console.Out.WriteLine($"+++ URL = {Request.GetDisplayUrl()}");
-
             JObject obj = JsonConvert.DeserializeObject(value) as JObject;
             if (obj == null)
             {
                 return;
             }
 
-            var webEventId = JsonParse<int>(obj, "EventId");
-            var webSurveyId = JsonParse<int>(obj, "SurveyId");
-            var contactName = JsonParse<string>(obj, "ContactName");
-            var contactEmail = JsonParse<string>(obj, "ContactEmail");
-            var wantNewsletter = JsonParse<bool>(obj, "WantNewsletter");
-            var goodGuy = JsonParse<string>(obj, "GoodGuy");
-            var badGuy = JsonParse<string>(obj, "BadGuy");
-            var feedback = JsonParse<string>(obj, "Feedback");
-            var source = JsonParse<string>(obj, "Source");
-
-            WebSurvey webSurvey = new WebSurvey
-            {
-                WebEventID = webEventId,
-                WebSurveyID = webSurveyId,
-                ContactName = contactName,
-                ContactEmail = contactEmail,
-                WantNewsletter = wantNewsletter,
-                GoodGuy = goodGuy,
-                BadGuy = badGuy,
-                Feedback = feedback,
-                Source = source
-            };
+            var newEvent = GetEventFromJsonToken(obj);
 
             var context = new DataContext();
-            context.WebSurveys.Add(webSurvey);
+            context.WebEvents.Add(newEvent);
             context.SaveChanges();
         }
 
@@ -100,7 +76,40 @@ namespace WebAssistedSurvey.Service.Controllers
 
         private T JsonParse<T>(JObject jObject, string name)
         {
-            return (T)jObject.SelectTokens(name);
+            return (T)jObject.SelectToken(name).ToObject(typeof(T));
+        }
+
+        private WebEvent GetEventFromJsonToken(JObject item)
+        {
+            try
+            {
+                var eventId = JsonParse<int>(item, "EventID");
+                var startDateTime = JsonParse<DateTime>(item, "StartDateTime");
+                var isMultidays = JsonParse<bool>(item, "IsMultidays");
+                var endDateTime = JsonParse<DateTime>(item, "EndDateTime");
+                var title = JsonParse<string>(item, "Title");
+                var summery = JsonParse<string>(item, "Summery");
+
+                var eventItem = new WebEvent
+                {
+                    StartDateTime = startDateTime,
+                    IsMultidays = isMultidays,
+                    EndDateTime = endDateTime,
+                    Title = title,
+                    Summery = summery
+                };
+
+                if (eventId != 0)
+                {
+                    eventItem.WebEventID = eventId;
+                }
+
+                return eventItem;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

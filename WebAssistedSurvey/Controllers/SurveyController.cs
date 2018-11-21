@@ -15,10 +15,10 @@ namespace WebAssistedSurvey.Controllers
 
         public IActionResult Show(int id)
         {
-            var surveyEvent = DatabaseLayer.GetEventById(id);
+            var surveyEvent = RestAdapter.GetEventById(id);
             if (surveyEvent == null)
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             if (DatabaseLayer.IsValidEventExisting(id))
@@ -37,9 +37,9 @@ namespace WebAssistedSurvey.Controllers
                 return View("Show", survey);
             }
 
-            if(!DatabaseLayer.AddSurvey(survey))
+            if(!RestAdapter.AddSurvey(survey))
             {
-                return NotFound();
+                return new StatusCodeResult(503);
             }
 
             return Content("Danke für Ihre Mithilfe.");
