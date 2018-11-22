@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using WebAssistedSurvey.Service.Extensions;
 using WebAssistedSurvey.Service.Models;
 
 namespace WebAssistedSurvey.Service.Controllers
@@ -75,31 +76,20 @@ namespace WebAssistedSurvey.Service.Controllers
             context.SaveChanges();
         }
 
-        private T JsonParse<T>(JObject jObject, string name)
-        {
-            return (T)jObject.SelectToken(name).ToObject(typeof(T));
-        }
-
         private WebEvent GetEventFromJsonToken(JObject item)
         {
             try
             {
-                var eventId = JsonParse<int>(item, "EventID");
-                var startDateTime = JsonParse<DateTime>(item, "StartDateTime");
-                var isMultidays = JsonParse<bool>(item, "IsMultidays");
-                var endDateTime = JsonParse<DateTime>(item, "EndDateTime");
-                var title = JsonParse<string>(item, "Title");
-                var summery = JsonParse<string>(item, "Summery");
-
                 var eventItem = new WebEvent
                 {
-                    StartDateTime = startDateTime,
-                    IsMultidays = isMultidays,
-                    EndDateTime = endDateTime,
-                    Title = title,
-                    Summery = summery
+                    StartDateTime = item.GetValue<DateTime>("StartDateTime"),
+                    IsMultidays = item.GetValue<bool>("IsMultidays"),
+                    EndDateTime = item.GetValue<DateTime>("EndDateTime"),
+                    Title = item.GetValue<string>("Title"),
+                    Summery = item.GetValue<string>("Summery")
                 };
 
+                var eventId = item.GetValue<int>("EventID");
                 if (eventId != 0)
                 {
                     eventItem.WebEventID = eventId;
