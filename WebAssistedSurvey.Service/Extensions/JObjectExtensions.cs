@@ -6,7 +6,11 @@ namespace WebAssistedSurvey.Service.Extensions
     {
         public static T GetValue<T>(this JObject jObject, string name)
         {
-            return (T)jObject.SelectToken(name).ToObject(typeof(T));
+            var token = jObject.SelectToken(name);
+
+            var value = token.ToObject<T>();
+
+            return value;
         }
     }
 }
