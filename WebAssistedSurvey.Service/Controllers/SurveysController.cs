@@ -17,13 +17,13 @@ namespace WebAssistedSurvey.Service.Controllers
         {
             var context = new DataContext();
 
-            var item = context.WebSurveys.FirstOrDefault(e => e.WebSurveyID == id);
-            if (item == null)
+            var survey = context.WebSurveys.FirstOrDefault(e => e.WebSurveyID == id);
+            if (survey == null)
             {
                 return NotFound();
             }
             
-            return new JsonResult(item);
+            return new JsonResult(survey);
         }
 
         [HttpGet("forEvent/{id}")]
@@ -49,10 +49,10 @@ namespace WebAssistedSurvey.Service.Controllers
                 return;
             }
 
-            var newEvent = GetSurveyFromJsonToken(obj);
+            var survey = GetSurveyFromJsonToken(obj);
 
             var context = new DataContext();
-            context.WebSurveys.Add(newEvent);
+            context.WebSurveys.Add(survey);
             context.SaveChanges();
         }
 

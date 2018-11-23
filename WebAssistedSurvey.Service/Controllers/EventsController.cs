@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,22 +19,22 @@ namespace WebAssistedSurvey.Service.Controllers
         {
             var context = new DataContext();
 
-            var allEvents = context.WebEvents.ToList();
+            var events = context.WebEvents.ToList();
 
-            return new JsonResult(allEvents);
+            return new JsonResult(events);
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var item = GetWebEventById(id);
-            if (item == null)
+            var @event = GetWebEventById(id);
+            if (@event == null)
             {
                 return NotFound();
             }
 
-            return new JsonResult(item);
+            return new JsonResult(@event);
         }
 
         // POST api/values
@@ -48,10 +47,10 @@ namespace WebAssistedSurvey.Service.Controllers
                 return;
             }
 
-            var newEvent = GetEventFromJsonToken(obj);
+            var @event = GetEventFromJsonToken(obj);
 
             var context = new DataContext();
-            context.WebEvents.Add(newEvent);
+            context.WebEvents.Add(@event);
             context.SaveChanges();
         }
 
@@ -60,18 +59,18 @@ namespace WebAssistedSurvey.Service.Controllers
         {
             var context = new DataContext();
 
-            var webEvent = GetWebEventById(id);
-            if (webEvent == null)
+            var @event = GetWebEventById(id);
+            if (@event == null)
             {
                 return;
             }
 
-            foreach (var webSurvey in webEvent.WebSurveys)
+            foreach (var survey in @event.WebSurveys)
             {
-                context.WebSurveys.Remove(webSurvey);
+                context.WebSurveys.Remove(survey);
             }
 
-            context.WebEvents.Remove(webEvent);
+            context.WebEvents.Remove(@event);
 
             context.SaveChanges();
         }
@@ -80,7 +79,7 @@ namespace WebAssistedSurvey.Service.Controllers
         {
             try
             {
-                var eventItem = new WebEvent
+                var @event = new WebEvent
                 {
                     StartDateTime = item.GetValue<DateTime>("StartDateTime"),
                     IsMultidays = item.GetValue<bool>("IsMultidays"),
@@ -92,10 +91,10 @@ namespace WebAssistedSurvey.Service.Controllers
                 var eventId = item.GetValue<int>("EventID");
                 if (eventId != 0)
                 {
-                    eventItem.WebEventID = eventId;
+                    @event.WebEventID = eventId;
                 }
 
-                return eventItem;
+                return @event;
             }
             catch
             {
@@ -107,16 +106,16 @@ namespace WebAssistedSurvey.Service.Controllers
         {
             var context = new DataContext();
 
-            var item = context.WebEvents.FirstOrDefault(e => e.WebEventID == id);
-            if (item == null)
+            var @event = context.WebEvents.FirstOrDefault(e => e.WebEventID == id);
+            if (@event == null)
             {
                 return null;
             }
 
-            var surveysForEvent = context.WebSurveys.Where(s => s.WebEventID == id);
-            item.WebSurveys = surveysForEvent.Any() ? new List<WebSurvey>(surveysForEvent) : new List<WebSurvey>();
+            var surveys = context.WebSurveys.Where(s => s.WebEventID == id);
+            @event.WebSurveys = surveys.Any() ? new List<WebSurvey>(surveys) : new List<WebSurvey>();
 
-            return item;
+            return @event;
         }
     }
 }
