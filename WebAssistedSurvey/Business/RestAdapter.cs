@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -52,13 +53,20 @@ namespace WebAssistedSurvey.Business
 
             var jsonResult = response.Result.Content.ReadAsStringAsync().Result;
 
-            JObject obj = JsonConvert.DeserializeObject(jsonResult) as JObject;
-            if (obj == null)
+            jsonResult = jsonResult.Replace("webEventID", "eventID");
+            jsonResult = jsonResult.Replace("webSurveyID", "surveyID");
+
+            Event @event = JsonConvert.DeserializeObject<Event>(jsonResult);
+
+            // better way to get the nested survey objects?
+            var objects = JsonConvert.DeserializeObject<JObject>(jsonResult);
+            var surveys = objects["webSurveys"].ToObject<List<Survey>>();
+            if (surveys.Any())
             {
-                return null;
+                @event.Surveys = new List<Survey>(surveys);
             }
 
-            return GetEventFromJsonToken(obj);
+            return @event;
         }
 
         internal static void AddEvent(Event newEvent, int eventDuration)
@@ -85,13 +93,9 @@ namespace WebAssistedSurvey.Business
 
             var jsonResult = response.Result.Content.ReadAsStringAsync().Result;
 
-            JObject obj = JsonConvert.DeserializeObject(jsonResult) as JObject;
-            if (obj == null)
-            {
-                return null;
-            }
+            var survey = JsonConvert.DeserializeObject<Survey>(jsonResult);
 
-            return GetSurveyFromJsonToken(obj);
+            return survey;
         }
 
         internal static bool IsValidEventExisting(int id)
@@ -111,31 +115,6 @@ namespace WebAssistedSurvey.Business
         internal static void DeleteEventWithSurveysByEventId(int id)
         {
             client.DeleteAsync($"{baseUrl}events/{id}");
-        }
-
-        private static Survey GetSurveyFromJsonToken(JObject jObject)
-        {
-            try
-            {
-                var survey = new Survey
-                {
-                    BadGuy = JsonParse<string>(jObject, "badGuy"),
-                    GoodGuy = JsonParse<string>(jObject, "goodGuy"),
-                    ContactEmail = JsonParse<string>(jObject, "contactEmail"),
-                    ContactName = JsonParse<string>(jObject, "contactName"),
-                    Feedback = JsonParse<string>(jObject, "feedback"),
-                    Source = JsonParse<string>(jObject, "source"),
-                    SurveyID = JsonParse<int>(jObject, "webSurveyID"),
-                    EventID = JsonParse<int>(jObject, "webEventID"),
-                    Created = JsonParse<DateTime>(jObject, "created")
-                };
-
-                return survey;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         private static Event GetEventFromJsonToken(JToken item)
