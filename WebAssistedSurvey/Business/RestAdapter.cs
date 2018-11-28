@@ -15,34 +15,13 @@ namespace WebAssistedSurvey.Business
 
         internal static IList<Event> GetEvents()
         {
-            var result = new List<Event>();
-
             var response = client.GetAsync($"{baseUrl}events");
 
-            try
-            {
-                var jsonResult = response.Result.Content.ReadAsStringAsync().Result;
+            var jsonResult = response.Result.Content.ReadAsStringAsync().Result;
 
-                JArray jArray = JsonConvert.DeserializeObject(jsonResult) as JArray;
-                if (jArray == null)
-                {
-                    return result;
-                }
-
-                foreach (var item in jArray)
-                {
-                    var eventItem = GetEventFromJsonToken(item);
-                    if (eventItem != null)
-                    {
-                        result.Add(eventItem);
-                    }
-                }
-
-            }
-            catch (AggregateException)
-            {
-                return null;
-            }
+            jsonResult = jsonResult.Replace("webEventID", "eventID");
+            jsonResult = jsonResult.Replace("webSurveyID", "surveyID");
+            var result = JsonConvert.DeserializeObject<IEnumerable<Event>>(jsonResult).ToList();
 
             return result;
         }
@@ -115,72 +94,6 @@ namespace WebAssistedSurvey.Business
         internal static void DeleteEventWithSurveysByEventId(int id)
         {
             client.DeleteAsync($"{baseUrl}events/{id}");
-        }
-
-        private static Event GetEventFromJsonToken(JToken item)
-        {
-            try
-            {
-                var eventId = JsonParse<int>(item, "webEventID");
-                var startDateTime = JsonParse<DateTime>(item, "startDateTime");
-                var isMultidays = JsonParse<bool>(item, "isMultidays");
-                var endDateTime = JsonParse<DateTime>(item, "endDateTime");
-                var title = JsonParse<string>(item, "title");
-                var summery = JsonParse<string>(item, "summery");
-
-                var eventItem = new Event
-                {
-                    EventID = eventId,
-                    StartDateTime = startDateTime,
-                    IsMultidays = isMultidays,
-                    EndDateTime = endDateTime,
-                    Title = title,
-                    Summery = summery,
-                    Surveys = ParseJsonSurveys(item)
-                };
-                return eventItem;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static IList<Survey> ParseJsonSurveys(JToken token)
-        {
-            var result = new List<Survey>();
-
-            if (!token.SelectToken("webSurveys").HasValues)
-            {
-                return result;
-            }
-
-            foreach (var item in token.SelectToken("webSurveys"))
-            {
-                var survey = new Survey
-                {
-                    BadGuy = JsonParse<string>(item, "badGuy"),
-                    GoodGuy = JsonParse<string>(item, "goodGuy"),
-                    ContactEmail = JsonParse<string>(item, "contactEmail"),
-                    ContactName = JsonParse<string>(item, "contactName"),
-                    Feedback = JsonParse<string>(item, "feedback"),
-                    Source = JsonParse<string>(item, "source"),
-                    SurveyID = JsonParse<int>(item, "webSurveyID"),
-                    EventID = JsonParse<int>(item, "webEventID"),
-                    Created = JsonParse<DateTime>(item, "created")
-                };
-
-                result.Add(survey);
-            }
-
-            return result;
-        }
-
-        private static T JsonParse<T>(JToken jToken, string name)
-        {
-            var obj = jToken.SelectToken(name).ToObject(typeof(T));
-
-            return (T)obj;
         }
     }
 }
