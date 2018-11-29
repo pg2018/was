@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WebAssistedSurvey.Models;
@@ -55,15 +56,23 @@ namespace WebAssistedSurvey.Business
                 newEvent.EndDateTime = newEvent.StartDateTime.AddHours(eventDuration);
             }
 
-            var json = JsonConvert.SerializeObject(newEvent);
-            client.PostAsJsonAsync($"{baseUrl}events", json);
+            var dataAsString = JsonConvert.SerializeObject(newEvent);
+
+            var content = new StringContent(dataAsString);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            client.PostAsync($"{baseUrl}events", content);
         }
 
         public static void AddSurvey(Survey survey)
         {
-            var json = JsonConvert.SerializeObject(survey);
+            var dataAsString = JsonConvert.SerializeObject(survey);
+            dataAsString = dataAsString.Replace("EventID", "WebEventID");
 
-            client.PostAsJsonAsync($"{baseUrl}surveys", json);
+            var content = new StringContent(dataAsString);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            client.PostAsync($"{baseUrl}surveys", content);
         }
 
         internal static Survey GetSurveyById(int id)
